@@ -37,6 +37,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # config.ssh.forward_agent = true
   config.ssh.username = "docker"
   config.ssh.shell = "/bin/sh -l"
+  config.ssh.private_key_path = "./cert/insecure_private_key"
 
   # Share an additional folder to the guest VM. The first argument is
   # the path on the host to the actual folder. The second argument is
