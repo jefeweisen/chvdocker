@@ -10,7 +10,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # please see the online documentation at vagrantup.com.
 
   # Every Vagrant virtual environment requires a box to build off of.
-  config.vm.box = "mitchellh/boot2docker"
+  config.vm.box = "boot2docker_virtualbox"
 
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs
@@ -35,8 +35,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # If true, then any SSH connections made will enable agent forwarding.
   # Default value: false
   # config.ssh.forward_agent = true
-  config.ssh.username = "docker"
-  config.ssh.shell = "/bin/sh -l"
+
   config.ssh.private_key_path = "./cert/insecure_private_key"
 
   # Share an additional folder to the guest VM. The first argument is
