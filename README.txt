@@ -2,7 +2,7 @@
 # TODO: obtain binary boot2docker_virtualbox.box
 #MD5 (boot2docker_virtualbox.box) = 1fdffb3a5d1ba83ec41bd3415be4df27
 
-vagrant box add boot2docker_virtualbox.box --name=boot2docker_virtualbox
+
 
 # run docker provider:
 vagrant up
@@ -30,3 +30,4 @@ vagrant ssh -c 'cd /vagrant && sudo ./build-iso.sh'
 vagrant destroy --force
 packer build -only=virtualbox-iso template.json
 # now have boot2docker_virtualbox.box
+vagrant box add boot2docker_virtualbox.box --name=boot2docker_virtualbox
