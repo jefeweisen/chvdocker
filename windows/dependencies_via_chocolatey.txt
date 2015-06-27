@@ -1,0 +1,17 @@
+# run powershell as Administrator
+
+Set-ExecutionPolicy RemoteSigned
+# answer yes
+
+# install chocolatey: (more at https://chocolatey.org/)
+iex ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1'))
+
+# install virtualbox: (tested incompatible with 4.3.28)
+choco install -y virtualbox --version 4.3.14
+choco install -y virtualbox.extensionpack --version 4.3.14.95030
+
+# install vagrant: (tested against v1.7.2)
+choco install -y vagrant --version 1.7.2
+
+# install docker:
+choco install docker --version 1.6.0
