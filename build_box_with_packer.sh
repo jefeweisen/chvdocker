@@ -2,7 +2,7 @@
 #
 # see: https://github.com/mitchellh/boot2docker-vagrant-box
 
-#git clone git@github.com:jefeweisen/boot2docker-vagrant-box.git -b vary_by_docker_version
+#git clone https://github.com/jefeweisen/boot2docker-vagrant-box.git -b vary_by_docker_version
 #cd boot2docker-vagrant-box
 vagrant up
 vagrant ssh -c 'cd /vagrant && sudo ./build-iso.sh'
