@@ -1,0 +1,16 @@
+---
+docker_port:
+  -
+    host: 2376
+    guest: 2376
+container_ports:
+  -
+    host: 4000
+    guest: 4000
+shares:
+  -
+    host:
+      isRelative: 1
+      path: chvdocker_data
+    guest:
+      path: /chvdocker_data

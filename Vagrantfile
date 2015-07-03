@@ -4,6 +4,59 @@
 # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
 VAGRANTFILE_API_VERSION = "2"
 
+require 'yaml'
+
+def filepathFromAbsOrRel(absOrRel)
+  if(absOrRel["isRelative"].to_i != 0) then
+    adir = File.dirname(__FILE__)
+    Pathname.new(adir).join(absOrRel["path"])
+  else
+    Pathname.new(absOrRel["path"])
+  end
+end
+
+def pathsFromShare(share)
+  guest = Pathname.new(share["guest"]["path"])
+  host = filepathFromAbsOrRel(share["host"])
+  [guest,host]
+end
+
+# find and read chvdocker yaml file
+filepathYaml = ENV["CHVDOCKER_YAML"]
+filepathYaml = filepathYaml ?
+  filepathYaml :
+  filepathFromAbsOrRel({'path' => 'chvdocker.yaml', 'isRelative' => '1'})
+chvdocker = YAML.load_file(filepathYaml)
+
+# emit a dockerrun.sh script according to the chvdocker.yaml configuration
+adir = File.dirname(__FILE__)
+fnDockerrun = File.join(adir, "tools", "dockerrun.sh")
+dockerrun = File.open(fnDockerrun, "w")
+dockerrun.puts("\#!/bin/bash")
+
+dockerrun.write("docker run --rm")
+
+ports = chvdocker["forwarded_ports"] ? chvdocker["forwarded_ports"] : []
+ports.each do |port|
+  puts("forwarded port: #{port}")
+  guest = port["guest"]
+  host = port["host"]
+  dockerrun.write(" -p #{host}:#{guest}")
+end
+
+shares = chvdocker["shares"] ? chvdocker["shares"] : []
+shares.each do |share|
+  adirGuest, adirHost = pathsFromShare(share)
+  puts("shared directory: host:#{adirHost} guest:#{adirGuest}")
+  dockerrun.write(" -v #{adirHost}:#{adirGuest}")
+end
+
+dockerrun.write(" -ti \"\$\@\"\n")
+
+dockerrun.close()
+FileUtils.chmod("u=wrx,go=rx", fnDockerrun)
+
+
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # All Vagrant configuration is done here. The most common configuration
   # options are documented and commented below. For a complete reference,
@@ -17,11 +70,15 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # `vagrant box outdated`. This is not recommended.
   # config.vm.box_check_update = false
 
-  # Create a forwarded port mapping which allows access to a specific port
-  # within the machine from a port on the host machine. In the example below,
-  # accessing "localhost:8080" will access port 80 on the guest machine.
-  config.vm.network "forwarded_port", guest: 2376, host: 2376
-  config.vm.network "forwarded_port", guest: 4000, host: 4000
+  docker_port = chvdocker["docker_port"]
+  docker_port.each do |port|
+    config.vm.network "forwarded_port", guest: port["guest"], host: port["host"]
+  end
+
+  ports = chvdocker["container_ports"] ? chvdocker["container_ports"] : []
+  ports.each do |port|
+    config.vm.network "forwarded_port", guest: port["guest"], host: port["host"]
+  end
 
   # Create a private network, which allows host-only access to the machine
   # using a specific IP.
@@ -38,13 +95,15 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.ssh.private_key_path = "./cert/insecure_private_key"
 
-  # Share an additional folder to the guest VM. The first argument is
-  # the path on the host to the actual folder. The second argument is
-  # the path on the guest to mount the folder. And the optional third
-  # argument is a set of non-required options.
-  config.vm.synced_folder "chvdocker_data", "/chvdocker_data"
-  # TODO: since symlinks won't work for sharing, make a way to
-  # dynamically plugin shares for mounts
+  shares = chvdocker["shares"] ? chvdocker["shares"] : []
+  shares.each do |share|
+    # Share an additional folder to the guest VM. The first argument is
+    # the path on the host to the actual folder. The second argument is
+    # the path on the guest to mount the folder. And the optional third
+    # argument is a set of non-required options.
+    adirGuest, adirHost = pathsFromShare(share)
+    config.vm.synced_folder adirHost, adirGuest
+  end
 
   # Provider-specific configuration so you can fine-tune various
   # backing providers for Vagrant. These expose provider-specific options.
