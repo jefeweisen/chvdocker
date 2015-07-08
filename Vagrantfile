@@ -6,6 +6,13 @@ VAGRANTFILE_API_VERSION = "2"
 
 require 'yaml'
 
+# find and read chvdocker yaml file
+filepathYaml = ENV["CHVDOCKER_YAML"]
+filepathYaml = filepathYaml ?
+  filepathYaml :
+  filepathFromAbsOrRel({'path' => 'chvdocker.yaml', 'isRelative' => '1'})
+chvdocker = YAML.load_file(filepathYaml)
+
 def filepathFromAbsOrRel(absOrRel)
   if(absOrRel["isRelative"].to_i != 0) then
     adir = File.dirname(__FILE__)
@@ -20,13 +27,6 @@ def pathsFromShare(share)
   host = filepathFromAbsOrRel(share["host"])
   [guest,host]
 end
-
-# find and read chvdocker yaml file
-filepathYaml = ENV["CHVDOCKER_YAML"]
-filepathYaml = filepathYaml ?
-  filepathYaml :
-  filepathFromAbsOrRel({'path' => 'chvdocker.yaml', 'isRelative' => '1'})
-chvdocker = YAML.load_file(filepathYaml)
 
 # emit a dockerrun.sh script according to the chvdocker.yaml configuration
 adir = File.dirname(__FILE__)
