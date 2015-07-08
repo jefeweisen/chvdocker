@@ -10,13 +10,14 @@ require 'yaml'
 $filepathYaml = ENV["CHVDOCKER_YAML"]
 $filepathYaml = $filepathYaml ?
   $filepathYaml :
-  filepathFromAbsOrRel({'path' => 'chvdocker.yaml', 'isRelative' => '1'})
+  Pathname.new(File.dirname(__FILE__)).join('chvdocker.yaml')
 chvdocker = YAML.load_file($filepathYaml)
 
+# Resolve relative paths, with respect to the location of chvdocker.yaml.
+# Yes really: not with respect to the location of Vagrantfile.
 def filepathFromAbsOrRel(absOrRel)
   if(absOrRel["isRelative"].to_i != 0) then
-    adir = File.dirname(__FILE__)
-    Pathname.new(adir).join(absOrRel["path"])
+    adir = Pathname.new(File.dirname($filepathYaml)).join(absOrRel["path"])
   else
     Pathname.new(absOrRel["path"])
   end
