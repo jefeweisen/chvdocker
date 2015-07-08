@@ -49,7 +49,7 @@ shares = chvdocker["shares"] ? chvdocker["shares"] : []
 shares.each do |share|
   adirGuest, adirHost = pathsFromShare(share)
   puts("shared directory: host:#{adirHost} guest:#{adirGuest}")
-  dockerrun.write(" -v #{adirHost}:#{adirGuest}")
+  dockerrun.write(" -v #{adirGuest}:#{adirGuest}")
 end
 
 dockerrun.write(" -ti \"\$\@\"\n")
