@@ -7,11 +7,11 @@ VAGRANTFILE_API_VERSION = "2"
 require 'yaml'
 
 # find and read chvdocker yaml file
-filepathYaml = ENV["CHVDOCKER_YAML"]
-filepathYaml = filepathYaml ?
-  filepathYaml :
+$filepathYaml = ENV["CHVDOCKER_YAML"]
+$filepathYaml = $filepathYaml ?
+  $filepathYaml :
   filepathFromAbsOrRel({'path' => 'chvdocker.yaml', 'isRelative' => '1'})
-chvdocker = YAML.load_file(filepathYaml)
+chvdocker = YAML.load_file($filepathYaml)
 
 def filepathFromAbsOrRel(absOrRel)
   if(absOrRel["isRelative"].to_i != 0) then
