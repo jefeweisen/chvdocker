@@ -42,7 +42,7 @@ fnDockerrunSh = File.join(adir, "tools", "dockerrun.sh")
 fnDockerrunRb = File.join(adir, "tools", "dockerrun.rb")
 dockerrunSh = File.open(fnDockerrunSh, "w")
 dockerrunSh.puts("\#!/bin/bash")
-dockerrunSh.write("'#{Gem.ruby}' '#{fnDockerrunRb}' \"\$@\"")
+dockerrunSh.write("env CHVDOCKER_YAML='#{$filepathYaml}' '#{Gem.ruby}' '#{fnDockerrunRb}' \"\$@\"")
 dockerrunSh.close()
 
 
