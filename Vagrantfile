@@ -6,12 +6,19 @@ VAGRANTFILE_API_VERSION = "2"
 
 require 'yaml'
 
+#*** BEGIN duplicate in dockerrun.rb
 # find and read chvdocker yaml file
 $filepathYaml = ENV["CHVDOCKER_YAML"]
 $filepathYaml = $filepathYaml ?
   $filepathYaml :
   Pathname.new(File.dirname(__FILE__)).join('chvdocker.yaml')
 chvdocker = YAML.load_file($filepathYaml)
+
+def pathGuestFromShare(share)
+    Pathname.new(share["guest"]["path"])
+end
+#*** END duplicate
+
 
 # Resolve relative paths, with respect to the location of chvdocker.yaml.
 # Yes really: not with respect to the location of Vagrantfile.
@@ -24,38 +31,19 @@ def filepathFromAbsOrRel(absOrRel)
 end
 
 def pathsFromShare(share)
-  guest = Pathname.new(share["guest"]["path"])
+  guest = pathGuestFromShare(share)
   host = filepathFromAbsOrRel(share["host"])
   [guest,host]
 end
 
-# emit a dockerrun.sh script according to the chvdocker.yaml configuration
+# emit a dockerrun.sh script according to vagrant configuration
 adir = File.dirname(__FILE__)
-fnDockerrun = File.join(adir, "tools", "dockerrun.sh")
-dockerrun = File.open(fnDockerrun, "w")
-dockerrun.puts("\#!/bin/bash")
-
-dockerrun.write("docker run --rm")
-
-ports = chvdocker["forwarded_ports"] ? chvdocker["forwarded_ports"] : []
-ports.each do |port|
-  puts("forwarded port: #{port}")
-  guest = port["guest"]
-  host = port["host"]
-  dockerrun.write(" -p #{host}:#{guest}")
-end
-
-shares = chvdocker["shares"] ? chvdocker["shares"] : []
-shares.each do |share|
-  adirGuest, adirHost = pathsFromShare(share)
-  puts("shared directory: host:#{adirHost} guest:#{adirGuest}")
-  dockerrun.write(" -v #{adirGuest}:#{adirGuest}")
-end
-
-dockerrun.write(" -ti \"\$\@\"\n")
-
-dockerrun.close()
-FileUtils.chmod("u=wrx,go=rx", fnDockerrun)
+fnDockerrunSh = File.join(adir, "tools", "dockerrun.sh")
+fnDockerrunRb = File.join(adir, "tools", "dockerrun.rb")
+dockerrunSh = File.open(fnDockerrunSh, "w")
+dockerrunSh.puts("\#!/bin/bash")
+dockerrunSh.write("'#{Gem.ruby}' '#{fnDockerrunRb}' \"\$@\"")
+dockerrunSh.close()
 
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
