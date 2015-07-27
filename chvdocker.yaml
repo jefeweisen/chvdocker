@@ -1,4 +1,9 @@
 ---
+vm_default:
+  -
+    vm_friendly_name: chvdocker_1-6-0
+    vm_machine_name: 1437695885
+    vm_uuid: b870f096-23d8-4ddf-9746-d677a9735454
 docker_port:
   -
     host: 2376
