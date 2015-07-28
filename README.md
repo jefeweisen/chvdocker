@@ -12,16 +12,20 @@ Combined together, these pieces could be a very quick to start single stop solut
 
 ## Requirements
 
-- Provision a docker container host (aka docker server)
-- Share filesystem folders between containers and the physical host
-- Share ports between containers and the physical host
-- Override all configuration with one environment variable
-- Allow invocation of chvdocker as a git submodule
-- Share one VM instance between different chvdocker working copies (e.g. from two different git modules consuming chvdocker as a submodule).  Vagrant seeks out to keep each Vagrantfile instance describing a VM unique to that absolute path, for reproducibility.  But since the only state we are recording in the docker container host is the docker image cache, sharing the VM is good.
-- Run on Mac OS X 10.10
-- Run on Windows 7 and Windows 8
-- Headless installation
-- Traceable upstream OS builds
+- Filesystem and Networking:
+    - Share filesystem folders between containers and the physical host
+    - Share ports between containers and the physical host
+- Configuration:
+    - Override all configuration with one environment variable
+    - Allow invocation of chvdocker as a git submodule
+- VM and container:
+    - Provide a docker container host (aka docker server)
+    - Share one VM instance between different chvdocker working copies (e.g. from two different git modules consuming chvdocker as a submodule).  Vagrant seeks out to keep each Vagrantfile instance describing a VM unique to that absolute path, for reproducibility.  But since the only state we are recording in the docker container host is the docker image cache, sharing the VM is good.
+- Nonfunctional requirements:
+    - Run on Mac OS X 10.10
+    - Run on Windows 7 and Windows 8
+    - Headless installation
+    - Traceable upstream OS builds
 
 ## Technology choices
 
