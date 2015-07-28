@@ -5,6 +5,7 @@
 VAGRANTFILE_API_VERSION = "2"
 
 require 'yaml'
+require 'fileutils'
 
 #*** BEGIN duplicate in dockerrun.rb
 # find and read chvdocker yaml file
@@ -45,6 +46,37 @@ dockerrunSh.puts("\#!/bin/bash")
 dockerrunSh.write("env CHVDOCKER_YAML='#{$filepathYaml}' '#{Gem.ruby}' '#{fnDockerrunRb}' \"\$@\"")
 dockerrunSh.close()
 
+def writeFile(afile, stContents)
+  fl = File.open(afile, "w")
+  fl.write(stContents)
+  fl.close()
+end
+
+# makeVirtualboxImageStayPut is for allowing us to use "chvdocker" capabilities from any starting
+# directory across our physical host.  Normally, this is a dangerous source of non-reproducible state,
+# but since all we're doing is hosting docker, it gives us a valuable way to reuse our local docker
+# image cache.
+#
+# I wish vagrant would just let us set the parameters.
+#
+# https://github.com/mitchellh/vagrant/blob/master/plugins/providers/virtualbox/action/set_name.rb
+#
+def makeVirtualboxImageStayPut(chvdockerMachine)
+  adirVbox = Pathname.new(File.dirname(__FILE__)).join('.vagrant/machines/default/virtualbox')
+
+  machine_name = chvdockerMachine["vm_machine_name"]
+  if(machine_name.nil?) then raise "key vm_machine_name is required" end
+  uuid = chvdockerMachine["vm_machine_name"]
+  if(uuid.nil?) then raise "key vm_uuid is required" end
+
+  FileUtils.mkdir_p(adirVbox)
+  writeFile(adirVbox.join("action_set_name"), machine_name)
+  writeFile(adirVbox.join("id"), chvdockerMachine["vm_uuid"])
+end
+
+vms = chvdocker["vm_default"] ? chvdocker["vm_default"] : []
+vm0 = vms[0] ? vms[0] : {}
+makeVirtualboxImageStayPut(vm0)
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # All Vagrant configuration is done here. The most common configuration
@@ -99,7 +131,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Example for VirtualBox:
   #
   config.vm.provider "virtualbox" do |vb|
-    vb.name = "chvdocker_1-6-0"
+    vb.name = chvdocker["vm_friendly_name"]
   #   # Don't boot with headless mode
   #   vb.gui = true
   #
